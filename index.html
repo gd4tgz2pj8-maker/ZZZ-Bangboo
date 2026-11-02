@@ -773,8 +773,19 @@ function renderFactionResults() {
   const container = document.getElementById("factionResults");
 
   container.innerHTML = `
-    <h2>ボンプ一覧</h2>
+  <h2>ボンプ一覧</h2>
 
+<div class="answer-legend">
+  <div class="legend-item">
+    <span class="legend-circle green"></span>
+    <span>正解済み</span>
+  </div>
+
+  <div class="legend-item">
+    <span class="legend-circle red"></span>
+    <span>未回答</span>
+  </div>
+</div>
     <div class="faction-grid">
       ${characters.map((c, i) => {
 
