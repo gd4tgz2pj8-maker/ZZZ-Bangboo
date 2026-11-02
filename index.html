@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ゼンゼロ キャラクター名前当てクイズ</title>
+<title>ゼンゼロ ボンプ名当てクイズ</title>
 <style>
 .answer.selected {
   background: #111620;
@@ -128,25 +128,25 @@ button{border:0;border-radius:10px;padding:12px 16px;font-weight:750;font-size:.
 <div class="wrap">
 <section class="card" id="startScreen">
   <h2>クイズに挑戦！</h2>
-  <p>制限時間30分以内に、できるだけ多くのキャラクターの名前を当てよう！</p>
+  <p>制限時間30分以内に、できるだけ多くのボンプの名前を当てよう！</p>
   <button class="primary" id="startButton">クイズを始める</button>
 </section>  
 <header>
 <div class="logo">ZZZ QUIZ</div>
-<h1>ゼンゼロ キャラクター名前当て</h1>
-<p class="sub">キャラクター名を入力して、何人答えられるか挑戦しよう！</p>
+<h1>ゼンゼロ ボンプ名当て</h1>
+<p class="sub">ボンプ名を入力して、何人答えられるか挑戦しよう！</p>
 </header>
 
 <section class="card hidden" id="quiz">
 <div class="stats">
 <div class="stat"><small>正解数</small><strong id="score">0</strong></div>
 <div class="stat"><small>残り時間</small><strong id="time">30:00</strong></div>
-<div class="stat"><small>キャラクター数</small><strong id="total">0</strong></div>
+<div class="stat"><small>ボンプ数</small><strong id="total">0</strong></div>
 </div>
 <div class="progress"><span id="bar"></span></div>
-<p class="question">知っているキャラクターの名前を入力！</p>
+<p class="question">知っているボンプの名前を入力！</p>
 <div class="inputrow">
-<input id="answer" autocomplete="off" placeholder="ここにキャラの名前をいれてね！" aria-label="キャラクター名">
+<input id="answer" autocomplete="off" placeholder="ここにボンプの名前をいれてね！" aria-label="ボンプ名">
 <button class="primary" id="submit">回答</button>
 </div>
 <div class="message" id="message" aria-live="polite"></div>
@@ -191,9 +191,9 @@ button{border:0;border-radius:10px;padding:12px 16px;font-weight:750;font-size:.
 <p class="footer">※これはクイズサイトのサンプルです。</p>
 </div>
 <script>
-// 下の配列に、クイズに出したいキャラクター名を追加してください。
+// 下の配列に、クイズに出したいボンプ名を追加してください。
 // 表記ゆれは aliases に登録できます。例：
-// { name: "キャラクター名", aliases: ["別表記", "よみ"] }
+// { name: "ボンプ名", aliases: ["別表記", "よみ"] }
 const characters = [
  {
    name:"アンビー・デマラ",
@@ -920,7 +920,7 @@ function renderFactionResults(){
 
  container.appendChild(legend);
 
- // キャラクターを陣営ごとにまとめる
+ // ボンプを陣営ごとにまとめる
  const factions={};
  characters.forEach(c=>{
   if(!factions[c.faction]){
@@ -961,7 +961,7 @@ function renderFactionResults(){
 
   const members = factions[faction];
 
-  // キャラクターがいない陣営は表示しない
+  // ボンプがいない陣営は表示しない
   if (!members) return;
 
   const section = document.createElement("div");
@@ -1043,7 +1043,7 @@ function finish(){
 
  $("resulttext").textContent=
   found.size===characters.length
-  ?"全キャラクター正解！すごい！"
+  ?"全ボンプ正解！すごい！"
   :"もう一度挑戦して、正解数を伸ばしてみよう！";
 
  $("factionResults").classList.add("hidden");
@@ -1055,7 +1055,7 @@ function selectHint(index){
 
  selectedHintIndex=index;
 
- $("hintResult").textContent="キャラクターを選択中";
+ $("hintResult").textContent="ボンプを選択中";
 
  renderList();
 }  
