@@ -1,0 +1,1162 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ゼンゼロ キャラクター名前当てクイズ</title>
+<style>
+.answer.selected {
+  background: #111620;
+  border: 2px solid #3498db;
+  color: #1769aa;
+}  
+:root{--bg:#10131b;--panel:#1b202c;--panel2:#242b39;--text:#f3f5fa;--muted:#aab4c5;--accent:#EE7C14;--green:#6ee7a8;--red:#ff7b86;--line:#343d4e}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at top,#252d3c 0,#10131b 55%);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+.wrap{max-width:850px;margin:0 auto;padding:24px 16px 48px}
+header{text-align:center;padding:16px 0 24px}
+.logo{display:inline-block;color:#11131a;background:var(--accent);font-weight:900;letter-spacing:.08em;padding:6px 12px;border-radius:7px;transform:skew(-7deg)}
+h1{font-size:clamp(1.5rem,5vw,2.5rem);margin:14px 0 8px}
+.sub{color:var(--muted);margin:0}
+.card{background:rgba(27,32,44,.96);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 12px 35px #0003}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.stat{background:var(--panel2);border-radius:12px;padding:12px;text-align:center}
+.stat small{display:block;color:var(--muted);font-size:.78rem}
+.stat strong{font-size:1.35rem}
+.progress{height:9px;background:#343d4e;border-radius:99px;overflow:hidden;margin:14px 0 22px}
+.progress span{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+.question{font-size:1.1rem;font-weight:700;text-align:center;margin:12px 0}
+.inputrow{display:flex;gap:8px;margin:18px 0 10px}
+input{width:100%;background:#111620;border:1px solid #465166;color:white;border-radius:10px;padding:14px;font-size:1rem;outline:none}
+input:focus{border-color:var(--accent)}
+button{border:0;border-radius:10px;padding:12px 16px;font-weight:750;font-size:.95rem;cursor:pointer}
+.primary{background:var(--accent);color:#161616}
+.secondary{background:#343d4e;color:var(--text)}
+.hint-buttons{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.hint-buttons button{
+  background:var(--accent);
+  color:#161616;
+}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.message{min-height:28px;font-weight:700;text-align:center;margin:10px 0}
+.message.good{color:var(--green)}.message.bad{color:var(--red)}
+.list{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:18px}
+.answer{background:#111620;border:1px solid var(--line);padding:9px 11px;border-radius:9px;color:var(--muted);font-size:.9rem}
+.answer.found{border-color:#3c9f72;color:var(--green);background:#142820}
+.footer{color:var(--muted);font-size:.82rem;text-align:center;margin-top:18px;line-height:1.6}
+.hidden{display:none}
+.result{text-align:center;padding:26px 8px}
+.result h2{font-size:2rem}
+.result strong{font-size:3rem;color:var(--accent)}
+@media(max-width:520px){.wrap{padding:14px 10px 30px}.card{padding:15px}.stats{gap:6px}.stat{padding:9px 5px}.stat strong{font-size:1.1rem}.inputrow{flex-direction:column}.inputrow button{width:100%}}
+/* クイズ終了後の陣営別一覧 */
+.faction-section {
+  margin-top: 36px;
+  margin-bottom: 36px;
+  text-align: left;
+}
+
+.faction-title{
+  font-size:1.2rem;
+  font-weight:800;
+  padding:10px 12px;
+  margin-bottom:12px;
+  background:var(--panel2);
+  border-radius:10px;
+  border-left:4px solid var(--accent);
+}
+
+.faction-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(110px,1fr));
+  gap:12px;
+}
+
+.faction-character{
+  background:var(--panel2);
+  border:1px solid var(--line);
+  border-radius:12px;
+  overflow:hidden;
+  text-align:center;
+}
+
+.faction-character img{
+  width:100%;
+  aspect-ratio:1/1;
+  object-fit:contain;
+  background:#111620;
+  display:block;
+}
+
+.faction-character p{
+  font-size:.85rem;
+  font-weight:700;
+  padding:8px 4px;
+  margin:0;
+  overflow-wrap:anywhere;
+}
+
+.faction-character .no-image{
+  aspect-ratio:1/1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--muted);
+  font-size:.75rem;
+  background:#111620;
+}  
+/* スマホ表示：陣営別一覧を横3列にする */
+@media screen and (max-width: 600px) {
+  .faction-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .faction-character p {
+    font-size: 0.75rem;
+    padding: 7px 2px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section class="card" id="startScreen">
+  <h2>クイズに挑戦！</h2>
+  <p>制限時間30分以内に、できるだけ多くのキャラクターの名前を当てよう！</p>
+  <button class="primary" id="startButton">クイズを始める</button>
+</section>  
+<header>
+<div class="logo">ZZZ QUIZ</div>
+<h1>ゼンゼロ キャラクター名前当て</h1>
+<p class="sub">キャラクター名を入力して、何人答えられるか挑戦しよう！</p>
+</header>
+
+<section class="card hidden" id="quiz">
+<div class="stats">
+<div class="stat"><small>正解数</small><strong id="score">0</strong></div>
+<div class="stat"><small>残り時間</small><strong id="time">30:00</strong></div>
+<div class="stat"><small>キャラクター数</small><strong id="total">0</strong></div>
+</div>
+<div class="progress"><span id="bar"></span></div>
+<p class="question">知っているキャラクターの名前を入力！</p>
+<div class="inputrow">
+<input id="answer" autocomplete="off" placeholder="ここにキャラの名前をいれてね！" aria-label="キャラクター名">
+<button class="primary" id="submit">回答</button>
+</div>
+<div class="message" id="message" aria-live="polite"></div>
+<div class="actions">
+
+<button class="secondary" id="hint">ヒント</button>
+
+<div id="hintPanel" style="display:none;">
+  <p>ヒントを見たい「？？？？」のマスをタップ</p>
+
+  <div class="hint-buttons">
+    <button id="hintPersonal">ﾕから一言</button>
+    <button type="button" id="hintFaction">陣営</button>
+    <button type="button" id="hintAttribute">属性・特性</button>
+    <button type="button" id="hintRarity">レア度</button>
+  </div>
+
+  <p>マスを選び、見たいヒントだけ開いてね。</p>
+
+  <div id="hintResult"></div>
+</div>
+
+<button class="secondary" id="giveup">ギブアップ</button>
+<button class="secondary" id="reset">最初から</button> 
+</div>
+<div class="list" id="list"></div>
+</section>
+
+<section class="card result hidden" id="result">
+<h2>クイズ終了！</h2>
+<p>正解数</p><strong id="finalscore">0</strong><p id="percent">0%</p>
+<p id="resulttext"></p>
+
+<div class="actions" style="justify-content:center">
+  <button class="primary" id="again">もう一度遊ぶ</button>
+  <button class="primary" id="showAnswers">答えを見る</button>
+</div>
+
+<div id="factionResults" class="hidden"></div>
+
+</section>
+<p class="footer">※これはクイズサイトのサンプルです。</p>
+</div>
+<script>
+// 下の配列に、クイズに出したいキャラクター名を追加してください。
+// 表記ゆれは aliases に登録できます。例：
+// { name: "キャラクター名", aliases: ["別表記", "よみ"] }
+const characters = [
+ {
+   name:"アンビー・デマラ",
+   aliases:["アンビー","あんびー","あんびー・でまら"],
+   personal:"ZZZアイコンガール 黄緑ver.",
+   faction:"邪兎屋",
+   attribute:"電気・撃破",
+   rarity:"A級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/05/28/43aeb29d176e10c9713b3b9b6ac0dd3a_2384682618213467101.png"
+ },
+ {
+   name:"ニコ・デマラ",
+   aliases:["ニコ","にこ","にこ・でまら"],
+   personal:"はやくツケ払ってね",
+   faction:"邪兎屋",
+   attribute:"エーテル・支援",
+   rarity:"A級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/05/23/3815b87d0e526b12127e69f5baed3fa7_2071488341033625974.png"
+ },
+ {
+   name:"ビリー・キッド",
+   aliases:["ビリー","びりー","びりー・きっど"],
+   personal:"スターライトナイト",
+   faction:"邪兎屋",
+   attribute:"物理・強攻",
+   rarity:"A級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/05/28/3db23765159cef54aecb564a310aa214_5875819227834946917.png"   
+ },
+ {
+   name:"猫宮又奈",
+   aliases:["猫又","ねこみやまな","ねこまた"],
+   personal:"たぶん綺良々の親戚",
+   faction:"邪兎屋",
+   attribute:"物理・強攻",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/05/28/4f6da69b0ac332789cfa8f1a3db17e77_6866504406372735530.png"
+ },
+ {
+   name:"エレン・ジョー",
+   aliases:["エレン","えれん","えれん・じょー"],
+   personal:"鮫イド",
+   faction:"ヴィクトリア家政",
+   attribute:"氷・強攻",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/05/28/71b99a24f7864beec31370cf07cbcafb_7099117086480817211.png"   
+ },
+ {
+   name:"朱鳶",
+   aliases:["しゅえん","シュエン"],
+   personal:"真面目な赤メッシュ",
+   faction:"治安局・特務捜査班",
+   attribute:"エーテル・強攻",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/05/28/391008a843e6a6e35b134b54dd498049_1301244787212807256.png"   
+ },
+ {
+   name:"青衣",
+   aliases:["ちんいー","チンイー"],
+   personal:"ファルザン先輩",
+   faction:"治安局・特務捜査班",
+   attribute:"電気・撃破",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/08/12/ed5601b7cde9bda222181258a3a312d4_4632136586354055308.png"   
+ },
+ {
+   name:"フォン・ライカン",
+   aliases:["ライカン","らいかん","ふぉん・らいかん"],
+   personal:"狼男",
+   faction:"ヴィクトリア家政",
+   attribute:"氷・撃破",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/05/28/127f1076f431a56918ba080bd7084c85_3329381659090289799.png"   
+ },
+ {
+   name:"アレクサンドリナ・セバスチャン",
+   aliases:["リナ","りな","あれくさんどりな・せばすちゃん"],
+   personal:"おばけ",
+   faction:"ヴィクトリア家政",
+   attribute:"電気・支援",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/05/28/af07b5681d49fb22a818dbf24536f347_3882748344546395498.png"   
+ },
+ {
+   name:"グレース・ハワード",
+   aliases:["グレース","ぐれーす","ぐれーす・はわーど"],
+   personal:"機械オタク",
+   faction:"白祇重工",
+   attribute:"電気・異常",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/05/28/b25a8a6174b97cc4c559029aafbe4a22_5090726243759751843.png"   
+ },
+ {
+   name:"ベン・ビガー",
+   aliases:["ベン","べん","べん・びがー"],
+   personal:"くまさん",
+   faction:"白祇重工",
+   attribute:"炎・防護",
+   rarity:"A級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/05/17/96c8a05b61d8a7a3d5c4ba5bfb76fd58_860957641937035940.png"   
+ },
+ {
+   name:"クレタ・ベロボーグ",
+   aliases:["クレタ","くれた","くれた・べろぼーぐ"],
+   personal:"ギザ歯🫶",
+   faction:"白祇重工",
+   attribute:"炎・撃破",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/05/28/f2dcd3f680b1e3873406fa4132f26178_4686138976346855105.png"   
+ },
+ {
+   name:"カリン・ウィクス",
+   aliases:["カリン","かりん","かりん・うぃくす"],
+   personal:"チェンソーウーマン",
+   faction:"ヴィクトリア家政",
+   attribute:"物理・強攻",
+   rarity:"A級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/05/16/6f351122be7781f8cd6f21722dd13661_2661769272105172713.png"   
+ },
+ {
+   name:"ルシアーナ・デ・モンテフィーノ",
+   aliases:["ルーシー","るーしー","るしあーな・で・もんてふぃーの"],
+   personal:"野蛮お嬢様",
+   faction:"カリュドーンの子",
+   attribute:"炎・支援",
+   rarity:"A級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/07/02/0005cb04259b2f2101e5aeac52033299_4730938854595310447.png"   
+ },
+ {
+   name:"パイパー・ウィール",
+   aliases:["パイパー","ぱいぱー","ぱいぱー・うぃーる"],
+   personal:"眠そうだね　おれと一緒",
+   faction:"カリュドーンの子",
+   attribute:"物理・異常",
+   rarity:"A級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/07/02/4a3910f9aad150df3aed53c5de28768e_8578434738157565712.png"   
+ },
+ {
+   name:"セス・ローウェル",
+   aliases:["セス","せす","せす・ろーうぇる"],
+   personal:"ネコ　弟",
+   faction:"治安局・特務捜査班",
+   attribute:"電気・防護",
+   rarity:"A級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/08/26/b2f8135275830a304ab2e92b2543d95c_927816365385918993.png"   
+ },
+ {
+   name:"ジェーン・ドゥ",
+   aliases:["ジェーン","じぇーん","じぇーん・どぅ"],
+   personal:"アタイ",
+   faction:"治安局・特務捜査班",
+   attribute:"物理・異常",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/08/26/87fcb83576a57e1aae31dfa0d6445b68_3499070425918560638.png"   
+ },
+ {
+   name:"バーニス・ホワイト",
+   aliases:["バーニス","ばーにす","ばーにす・ほわいと"],
+   personal:"「上半身TT兄弟、下半身グルコサミン」ダンス",
+   faction:"カリュドーンの子",
+   attribute:"炎・異常",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/10/14/299a89bfbb926df9a396ad76db78f6f9_5120076859000576241.png"   
+ },
+ {
+   name:"キング・シーザー",
+   aliases:["シーザー","しーざー","きんぐ・しーざー"],
+   personal:"俺様系女子",
+   faction:"カリュドーンの子",
+   attribute:"物理・防護",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/09/05/6972b0d890536070ddb28b1af7b671ec_280027749603350505.png"   
+ },
+ {
+   name:"月城柳",
+   aliases:["やなぎ","柳","つきしろやなぎ"],
+   personal:"メガネお姉さん",
+   faction:"対ホロウ特別行動部第六課",
+   attribute:"電気・異常",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/10/25/3dd34f678f97c8a2101f0d3ba0710715_7070642981073250787.png"   
+ },
+ {
+   name:"浅羽悠真",
+   aliases:["はるまさ","悠真","あさばはるまさ"],
+   personal:"逆五条悟",
+   faction:"対ホロウ特別行動部第六課",
+   attribute:"電気・強攻",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/12/05/0fbcba9e8701eca206e255e7c4ebc940_2852126057511453091.png"   
+ },
+ {
+   name:"星見雅",
+   aliases:["みやび","雅","ほしみみやび"],
+   personal:"キツネ課長",
+   faction:"対ホロウ特別行動部第六課",
+   attribute:"霜烈・異常",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/12/05/7cf7a63a5f2c358f41447e8625696179_5728613537777614486.png"   
+ },
+ {
+   name:"ライト",
+   aliases:["らいと"],
+   personal:"本国から出てこない誰かの推し",
+   faction:"カリュドーンの子",
+   attribute:"炎・撃破",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/10/25/62f6ec8192859deb907183ee5af41fbc_7203727196610268894.png"   
+ },
+ {
+   name:"イヴリン・シェヴァリエ",
+   aliases:["イヴリン","いゔりん","いゔりん・しぇゔぁりえ"],
+   personal:"夜蘭の色違い",
+   faction:"スターズ・オブ・リラ",
+   attribute:"炎・強攻",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2025/02/11/2b3105799ae8936a1a2e05a8f9799c7c_1238822250851367926.png"   
+ },
+ {
+   name:"アストラ・ヤオ",
+   aliases:["アストラ","あすとら","あすとら・やお"],
+   personal:"歌姫",
+   faction:"スターズ・オブ・リラ",
+   attribute:"エーテル・支援",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2025/01/21/96b569066923ada5741838ab3a62a9db_6757234780440279769.png"   
+ },
+ {
+   name:"儀玄",
+   aliases:["いーしぇん","イーシェン"],
+   personal:"師匠",
+   faction:"雲嶽山",
+   attribute:"玄墨・命破",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2025/06/04/e6eceb709a7e39e22c09c94ec190fb42_3993513732551662280.png"   
+ },
+ {
+   name:"橘福福",
+   aliases:["フーフー","ふーふー","チー・フーフー","ちー・ふーふー","チーフーフー","ちーふーふー","福福"],
+   personal:"虎ちゃん",
+   faction:"雲嶽山",
+   attribute:"炎・撃破",
+   rarity:"S級",
+   image:"https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2025/06/09/59155606/5b0c653a0b1c96241c86da6d3bc8f799_9212422854715555802.png"   
+ },
+ {
+   name:"潘引壺",
+   aliases:["ぱん・いんふー","ぱん","ぱんいんふー","パン","パン・インフー","パンインフー","潘"],
+   personal:"兄弟子、モツ炒めください",
+   faction:"雲嶽山",
+   attribute:"物理・防護",
+   rarity:"A級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2025/06/04/de8464640c050cc3abbb90a410e37515_7863788274429390034.png" 
+ },
+ {
+   name:"葉瞬光",
+   aliases:["よう・しゅんこう","ヨウ・シュンコウ","ようしゅんこう","ヨウシュンコウ","しゅんこう","シュンコウ","瞬光"],
+   personal:"よくわからんけど二重人格かなんかですか？？？",
+   faction:"雲嶽山",
+   attribute:"凛刃・強攻",
+   rarity:"S級",
+   image:"https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2025/11/19/474051746/567b6d9975cec0cb335c09ead8e7720a_1899907792152996547.png"   
+ },
+ {
+   name:"照",
+   aliases:["ざお","ザオ"],
+   personal:"一般通過運動会お父さんのダミアン",
+   faction:"クランプスの黒枝",
+   attribute:"氷・防護",
+   rarity:"S級",
+   image:"https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2025/11/15/474051746/1340550c86a14e14274ebded5cf4ba3b_628566377613752018.png"   
+ },
+ {
+   name:"イドリー・マーフィー",
+   aliases:["いどりー","イドリー","いどりー・まーふぃー"],
+   personal:"タコ",
+   faction:"怪啖屋",
+   attribute:"氷・命破",
+   rarity:"S級",
+   image:"https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2025/08/25/59155606/6e12b5f5f69717b69173aaeb3991cc27_2975548642279878589.png"   
+ },
+ {
+   name:"プルクラ・フェリーニ",
+   aliases:["ぷるくら","プルクラ","ぷるくら・ふぇりーに"],
+   personal:"ケモお姉さん",
+   faction:"カリュドーンの子",
+   attribute:"物理・撃破",
+   rarity:"A級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2025/03/11/76d1e64c6ea76ffb7aabfd090c30dba0_3692781990695818269.png"   
+ },
+ {
+   name:"「トリガー」",
+   aliases:["とりがー","トリガー","「とりがー」"],
+   personal:"それ前見えてんの？？？",
+   faction:"防衛軍・オボルス小隊",
+   attribute:"電気・撃破",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2025/03/31/26f1e63602588117c4d0eaabb604d2c1_8323019581904676813.png"   
+ },
+ {
+   name:"オルペウス・マグヌッソン＆「鬼火」",
+   aliases:["おるぺうす","オルペウス","おるぺうす・まぐぬっそん","オルペウス・マグヌッソン"],
+   personal:"鬼火隊長",
+   faction:"防衛軍・オボルス小隊",
+   attribute:"炎・強攻",
+   rarity:"S級",
+   image:"https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2025/07/28/59155606/7473503f9af622d85b799c76838b9c4b_3273353374085876873.png"   
+ },
+ {
+   name:"アリス・タイムフィールド",
+   aliases:["ありす","アリス","ありす・たいむふぃーるど"],
+   personal:"シンメトリーガチ勢",
+   faction:"怪啖屋",
+   attribute:"物理・異常",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2025/08/04/9dffbc67a9946156827b07176823aa15_5696342392442957480.png"   
+ },
+ {
+   name:"シーシィア",
+   aliases:["しーしぃあ"],
+   personal:"ギャル",
+   faction:"治安局・都市秩序部",
+   attribute:"電気・強攻",
+   rarity:"S級",
+   image:"https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2026/02/13/16427676/418ab5f4aacd1e4d2ee2ae006e634b82_5406578101117348664.png"   
+ },
+ {
+   name:"浮波柚葉",
+   aliases:["ゆずは","うきなみゆずは","柚葉"],
+   personal:"そのヒールの高さはどうかと思う",
+   faction:"怪啖屋",
+   attribute:"物理・支援",
+   rarity:"S級",
+   image:"https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2025/08/31/59155606/7a65124559c82ec0fea6dc7747537f44_4202662790721761167.png"   
+ },
+ {
+   name:"「11号」",
+   aliases:["11号","11ごう","「11ごう」"],
+   personal:"一生視界が黄色",
+   faction:"防衛軍・オボルス小隊",
+   attribute:"炎・強攻",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/05/16/e0d2c585da7186984e2a1e66714131f8_348745644031971587.png"   
+ },
+ {
+   name:"アンドー・イワノフ",
+   aliases:["アンドー","あんどー","あんどー・いわのふ"],
+   personal:"熱血男",
+   faction:"白祇重工",
+   attribute:"電気・強攻",
+   rarity:"A級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/05/17/4ad598ef6760d23196d488cba5c1af8a_5032015665623889570.png"   
+ },
+ {
+   name:"蒼角",
+   aliases:["そうかく","ソウカク"],
+   personal:"コスするなら全身青タイツ＆顔面ペイント",
+   faction:"対ホロウ特別行動部第六課",
+   attribute:"氷・支援",
+   rarity:"A級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/05/23/f7e89a3278d04fc252011df8b9230b7b_1724004390987084817.png"   
+ },
+ {
+   name:"0号・アンビー",
+   aliases:["0号アンビー","0ごうあんびー","0号・あんびー"],
+   personal:"ZZZアイコンガール　黄色ver.",
+   faction:"防衛軍・シルバー小隊",
+   attribute:"電気・強攻",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2025/03/11/919494a3711fe2eae1a74d8b8427ee5a_596255076640499455.png"   
+ },
+ {
+   name:"ビビアン・バンシー",
+   aliases:["ビビアン","びびあん","びびあん・ばんしー"],
+   personal:"パエトーン限界オタク",
+   faction:"モッキンバード",
+   attribute:"エーテル・異常",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2025/04/22/725b53a868786abab00f01ef9a174c88_7922982168600779570.png"
+},
+{
+   name:"ヒューゴ・ヴラド",
+   aliases:["ヒューゴ","ひゅーご","ひゅーご・ゔらど"],
+   personal:"怪盗",
+   faction:"モッキンバード",
+   attribute:"氷・強攻",
+   rarity:"S級",
+   image:"https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2025/05/14/59155606/e452bdd54ff290d277cc1988ed2d6e17_8687046143582199946.png"   
+ },
+ {
+   name:"「シード」",
+   aliases:["シード","しーど","「しーど」"],
+   personal:"セグウェイ",
+   faction:"防衛軍・オボルス小隊",
+   attribute:"電気・強攻",
+   rarity:"S級",
+   image:"https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2025/07/26/59155606/47a51ea9f05bd537d1b753de532c38aa_3867385733272981618.png"   
+ },
+ {
+   name:"リュシア・エロウェン",
+   aliases:["リュシア","りゅしあ","りゅしあ・えろうぇん"],
+   personal:"ピクミン　エーテリアスver.",
+   faction:"怪啖屋",
+   attribute:"エーテル・支援",
+   rarity:"S級",
+   image:"https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2025/09/29/59155606/52a136e457486551ff1c13ca87e70748_1519978623157083107.png"   
+ },
+ {
+   name:"狛野真斗",
+   aliases:["まなと","こまのまなと","真斗"],
+   personal:"でっけえ犬",
+   faction:"怪啖屋",
+   attribute:"炎・命破",
+   rarity:"A級",
+   image:"https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2025/08/25/59155606/4a5806a43ea0eeeaab0379a9f66cc3fe_5095587983088246552.png"   
+ },
+ {
+   name:"ダイアリン",
+   aliases:["だいありん"],
+   personal:"✊✌️🖐️",
+   faction:"クランプスの黒枝",
+   attribute:"物理・撃破",
+   rarity:"S級",
+   image:"https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2026/02/22/203462023/21ee54598e5ea637ef9e8e5eaf348a3b_3852045571428375348.png"   
+ },
+ {
+   name:"盤岳",
+   aliases:["ばんがく","バンガク"],
+   personal:"先生",
+   faction:"クランプスの黒枝",
+   attribute:"炎・命破",
+   rarity:"S級",
+   image:"https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2025/10/12/59155606/79249c6bb979ef74183b364665e2c9f2_2199926498175040459.png"   
+ },
+ {
+   name:"千夏",
+   aliases:["ちなつ","チナツ"],
+   personal:"禪院直哉",
+   faction:"妄想エンジェル",
+   attribute:"物理・支援",
+   rarity:"S級",
+   image:"https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2026/01/02/59155606/fca35fd54bd8fe6704d24f46edb11f4c_8111293177669399581.png"   
+ }, 
+ {
+   name:"アリア",
+   aliases:["ありあ"],
+   personal:"人間と構造体の２way",
+   faction:"妄想エンジェル",
+   attribute:"エーテル・異常",
+   rarity:"S級",
+   image:"https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2026/01/02/59155606/0cbe8be1e94acd93a0acd7e17ccaa463_8132176171247498252.png"   
+ },
+ {
+   name:"南宮羽",
+   aliases:["ゆう","羽","なんぐうゆう"],
+   personal:"タコさんウインナー",
+   faction:"妄想エンジェル",
+   attribute:"エーテル・撃破",
+   rarity:"S級",
+   image:"https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2026/02/13/203462023/d56138a233f0ef0d82fd32131b690560_928685649604378240.png"   
+ },
+ {
+   name:"プロメイア",
+   aliases:["ぷろめいあ"],
+   personal:"手錠",
+   faction:"クランプスの黒枝",
+   attribute:"氷・異常",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2026/05/06/407610f2b368894b3c803bc399dcac3e_1869311111116973024.png"   
+ },
+ {
+   name:"スターライト・ビリー・キッド",
+   aliases:["すたーらいと・びりー","スターライト・ビリー","すたーらいと・びりー・きっど"],
+   personal:"スターライトナイト with B(バイク)",
+   faction:"邪兎屋",
+   attribute:"物理・命破",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2026/05/25/66bde33390ceb352ccdba3182eb78f2c_2857724575942802582.png"   
+ },
+ {
+   name:"ピュロイス",
+   aliases:["ぴゅろいす"],
+   personal:"君は結局何？？主人公？なの？？？",
+   faction:"パエトーン",
+   attribute:"エーテル・強攻",
+   rarity:"∞級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2026/06/16/69723b34e8b9cf4f5b7b98e6dff8d202_2315549761560555071.png"   
+ },
+ {
+   name:"ヴェリナ・エガード",
+   aliases:["ヴェリナ","ゔぇりな","ゔぇりな・えがーど"],
+   personal:"クソデカ扇子",
+   faction:"外務計策局",
+   attribute:"風・異常",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2026/06/16/d1c0912271a744a242ba3836e3ad7515_6009918991675379943.png"   
+ }, 
+ {
+   name:"ノルムー・ホローウェル",
+   aliases:["ノルムー","のるむー","のるむー・ほろーうぇる"],
+   personal:"なのだ！",
+   faction:"外務計策局",
+   attribute:"炎・撃破",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2026/07/07/77a584948e350cb38bed686895a934d8_1035892473153194484.png"   
+ },
+ {
+   name:"レミエール・ダン",
+   aliases:["レミエール","れみえーる","れみえーる・だん"],
+   personal:"でっけえ羽　ちっせえ布面積",
+   faction:"ダアト結社",
+   attribute:"流明・異常",
+   rarity:"S級",
+   image:"https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2026/06/22/59155606/0d0cd5b5fc60173dc78d2e4002e3d2b5_7337129371931435940.png"   
+ },
+ {
+   name:"シグリッド・ドゥ・ラズール",
+   aliases:["シグリッド","しぐりっど","しぐりっど・どぅ・らずーる"],
+   personal:"どーきどきどきどきどきどきどきどき　きみの愛馬が！",
+   faction:"空域巡警局",
+   attribute:"氷・強攻",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2026/07/28/eebf970fae3bbfe7e1700609300f80c5_6738457060287477693.png"   
+ },
+ {
+   name:"クラレッタ・フリンツ",
+   aliases:["クラレッタ","くられった","くられった・ふりんつ"],
+   personal:"吸血鬼？",
+   faction:"フリンツ工房",
+   attribute:"電気・鋭御",
+   rarity:"S級",
+   image:"https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2026/08/18/59155606/721022d8313d88c5b118e20c869127b0_567077980557606490.png"   
+ },
+ {
+   name:"ロクシー・イフリータ・プライス",
+   aliases:["ロクシー","ろくしー","ろくしー・いふりーた・ぷらいす"],
+   personal:"社畜",
+   faction:"フリンツ工房",
+   attribute:"風・撃破",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2026/09/29/69d82d41bf57407c1d18d181d5c8842f_5489981853866788342.png"   
+ },
+ {
+   name:"フィオニー・レファエラ",
+   aliases:["フィオニー","ふぃおにー","ふぃおにー・れふぁえら"],
+   personal:"生命力のないベネット",
+   faction:"クランプスの黒枝",
+   attribute:"炎・異常",
+   rarity:"S級",
+   image:"https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2026/10/21/03e76332f05325fce0ca1edde792507f_7242397893670331759.png"  
+ },
+ {
+   name:"セヴェリアン・ローウェル",
+   aliases:["セヴェリアン","せゔぇりあん","せゔぇりあん・ろーうぇる"],
+   personal:"ネコ　兄",
+   faction:"治安局・都市秩序部",
+   attribute:"風・強攻",
+   rarity:"S級",
+   image:"https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2026/10/20/59155606/2cec2fcbccf6c48d0f5d1b434a5014a0_4079242178332058189.png"   
+ }, 
+ {
+   name:"サンブリンガー",
+   aliases:["さんぶりんがー"],
+   personal:"3人1組",
+   faction:"ロスカリファ",
+   attribute:"-・鋭御",
+   rarity:"S級",
+   image:"https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2026/10/25/59155606/00ec4d70ff0aeddf8aab1041a33377d8_7488067617955763806.gif"
+ }, 
+ {
+   name:"カフカ",
+   aliases:["かふか"],
+   personal:"別世界のママ",
+   faction:"崩壊：スターレイル",
+   attribute:"電気・異常",
+   rarity:"-級",
+   image:"https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2026/10/25/59155606/8a9bf4662588b971e8834f7a053a29bd_8595141512440667287.png"
+ }, 
+ {
+   name:"ロビン",
+   aliases:["ろびん"],
+   personal:"別世界の歌姫",
+   faction:"崩壊：スターレイル",
+   attribute:"エーテル・防護",
+   rarity:"-級",
+   image:"https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2026/10/25/59155606/addeffee67edba936baa1a27b2220007_1471939608515220189.png"
+ }, 
+];
+const implementationOrder = [
+  "エレン・ジョー",
+  "猫宮又奈",
+  "アンビー・デマラ",
+  "ビリー・キッド",
+  "ニコ・デマラ",
+  "フォン・ライカン",
+  "アレクサンドリナ・セバスチャン",
+  "カリン・ウィクス",
+  "グレース・ハワード",
+  "クレタ・ベロボーグ",
+  "アンドー・イワノフ",
+  "ベン・ビガー",
+  "パイパー・ウィール",
+  "ルシアーナ・デ・モンテフィーノ",
+  "「11号」",
+  "蒼角",
+  "朱鳶",
+  "青衣",
+  "ジェーン・ドゥ",
+  "セス・ローウェル",
+  "キング・シーザー",
+  "バーニス・ホワイト",
+  "月城柳",
+  "ライト",
+  "星見雅",
+  "浅羽悠真",
+  "アストラ・ヤオ",
+  "イヴリン・シェヴァリエ",
+  "0号・アンビー",
+  "プルクラ・フェリーニ",
+  "「トリガー」",
+  "ビビアン・バンシー",
+  "ヒューゴ・ヴラド",
+  "儀玄",
+  "潘引壺",
+  "橘福福",
+  "浮波柚葉",
+  "アリス・タイムフィールド",
+  "「シード」",
+  "オルペウス・マグヌッソン＆「鬼火」",
+  "リュシア・エロウェン",
+  "狛野真斗",
+  "イドリー・マーフィー",
+  "ダイアリン",
+  "盤岳",
+  "葉瞬光",
+  "照",
+  "千夏",
+  "アリア",
+  "南宮羽",
+  "シーシィア",
+  "プロメイア",
+  "スターライト・ビリー・キッド",
+  "ヴェリナ・エガード",
+  "ピュロイス",
+  "ノルムー・ホローウェル",
+  "レミエール・ダン",
+  "シグリッド・ドゥ・ラズール",
+  "クラレッタ・フリンツ",
+  "ロクシー・イフリータ・プライス",
+  "フィオニー・レファエラ",
+  "セヴェリアン・ローウェル",
+  "サンブリンガー",
+  "カフカ",
+  "ロビン"
+];
+
+const orderMap = new Map(
+  implementationOrder.map((name, index) => [name, index])
+);
+
+characters.sort((a, b) =>
+  (orderMap.get(a.name) ?? Infinity) -
+  (orderMap.get(b.name) ?? Infinity)
+);  
+
+const $ = id => document.getElementById(id);
+
+let found = new Set();
+let seconds = 1800;
+let timer = null;
+let ended = false;
+let selectedHintIndex = null;
+
+const norm = s => String(s).toLowerCase()
+  .replace(/[ 　・･\-‐‑—ー_]/g, "")
+  .replace(/[「」『』（）()]/g, "")
+  .trim();
+function renderList(){
+ $("list").innerHTML="";
+
+ characters.forEach((c,i)=>{
+  const d=document.createElement("div");
+
+  d.className = "answer"
+  + (found.has(i) ? " found" : "")
+  + (selectedHintIndex === i ? " selected" : "");
+  d.textContent=found.has(i)?c.name:"？？？？";
+
+  if(!found.has(i)){
+   d.addEventListener("click",()=>{
+    selectHint(i);
+   });
+  }
+
+  $("list").appendChild(d);
+ });
+
+ $("score").textContent=found.size;
+ $("total").textContent=characters.length;
+ $("bar").style.width=(found.size/characters.length*100)+"%";
+}  
+function say(text,type=""){ $("message").textContent=text;$("message").className="message "+type; }
+function startTimer(){
+ clearInterval(timer);timer=setInterval(()=>{if(ended)return;seconds--;updateTime();if(seconds<=0)finish();},1000);
+}
+function updateTime(){ $("time").textContent=Math.floor(seconds/60).toString().padStart(2,"0")+":"+Math.max(0,seconds%60).toString().padStart(2,"0");}
+function answer(){
+ if(ended)return;
+ const value=norm($("answer").value);if(!value)return;
+ const idx=characters.findIndex((c,i)=>!found.has(i)&&[c.name,...(c.aliases||[])].some(a=>norm(a)===value));
+ if(idx>=0){found.add(idx);$("answer").value="";say("正解！ "+characters[idx].name,"good");renderList();if(found.size===characters.length)finish();}
+ else say("まだ正解ではないみたい。別の名前も試してみて！","bad");
+}
+
+function renderFactionResults(){
+
+ const container=$("factionResults");
+ container.innerHTML="";
+
+ // 未回答の凡例
+ const legend = document.createElement("p");
+ legend.innerHTML = '<span style="color:#ff5c65;">●</span>：未回答';
+ legend.style.fontWeight = "bold";
+ legend.style.marginBottom = "12px";
+
+ container.appendChild(legend);
+
+ // キャラクターを陣営ごとにまとめる
+ const factions={};
+ characters.forEach(c=>{
+  if(!factions[c.faction]){
+   factions[c.faction]=[];
+  }
+
+  factions[c.faction].push(c);
+ });
+
+ // 陣営の表示順
+ const factionOrder = [
+  "邪兎屋",
+  "ヴィクトリア家政",
+  "白祇重工",
+  "防衛軍・オボルス小隊",
+  "対ホロウ特別行動部第六課",
+  "治安局・特務捜査班",
+  "カリュドーンの子",
+  "スターズ・オブ・リラ",
+  "防衛軍・シルバー小隊",
+  "モッキンバード",
+  "雲嶽山",
+  "怪啖屋",
+  "クランプスの黒枝",
+  "妄想エンジェル",
+  "治安局・都市秩序部",
+  "パエトーン",
+  "外務計策局",
+  "ダアト結社",
+  "空域巡警局",
+  "フリンツ工房",
+  "ロスカリファ",
+  "崩壊：スターレイル"
+ ];
+
+ // 指定した順番で陣営を表示
+ factionOrder.forEach(faction => {
+
+  const members = factions[faction];
+
+  // キャラクターがいない陣営は表示しない
+  if (!members) return;
+
+  const section = document.createElement("div");
+  section.className = "faction-section";
+
+  const title = document.createElement("h3");
+  title.className = "faction-title";
+  title.textContent = faction;
+
+  const grid = document.createElement("div");
+  grid.className = "faction-grid";
+
+  members.forEach(c => {
+
+   const card = document.createElement("div");
+   card.className = "faction-character";
+
+   if (c.image) {
+    const img = document.createElement("img");
+    img.src = c.image;
+    img.alt = c.name;
+
+    img.onerror = () => {
+     img.onerror = null;
+     img.remove();
+
+     const noImage = document.createElement("div");
+     noImage.className = "no-image";
+     noImage.textContent = "画像未設定";
+
+     card.prepend(noImage);
+    };
+
+    card.appendChild(img);
+
+   } else {
+    const noImage = document.createElement("div");
+    noImage.className = "no-image";
+    noImage.textContent = "画像未設定";
+
+    card.appendChild(noImage);
+   }
+
+   const name = document.createElement("p");
+   name.style.color = found.has(characters.indexOf(c))
+  ? "var(--text)"
+  : "#ff5c65";    
+   name.textContent = c.name;
+
+   card.appendChild(name);
+   grid.appendChild(card);
+
+  });
+
+  section.appendChild(title);
+  section.appendChild(grid);
+  container.appendChild(section);
+
+ });
+}  
+function finish(){
+
+ if(ended)return;
+
+ ended=true;
+ clearInterval(timer);
+
+ $("quiz").classList.add("hidden");
+ $("result").classList.remove("hidden");
+
+ $("finalscore").textContent=
+  found.size+" / "+characters.length;
+
+ const p=Math.round(
+  found.size/characters.length*100
+ );
+
+ $("percent").textContent="達成率："+p+"%";
+
+ $("resulttext").textContent=
+  found.size===characters.length
+  ?"全キャラクター正解！すごい！"
+  :"もう一度挑戦して、正解数を伸ばしてみよう！";
+
+ $("factionResults").classList.add("hidden");
+ $("showAnswers").classList.remove("hidden");
+}
+  
+function selectHint(index){
+ if(found.has(index))return;
+
+ selectedHintIndex=index;
+
+ $("hintResult").textContent="キャラクターを選択中";
+
+ renderList();
+}  
+
+function showHint(type){
+ if(selectedHintIndex===null){
+  $("hintResult").textContent="先に「？？？？」のマスを選んでね！";
+  return;
+ }
+
+ const c=characters[selectedHintIndex];
+
+ const hintData={
+  personal:c.personal,
+  faction:c.faction,
+  attribute:c.attribute,
+  rarity:c.rarity
+ };
+
+ const labels={
+  personal:"ﾕから一言",
+  faction:"陣営",
+  attribute:"属性・特性",
+  rarity:"レア度"
+ };
+
+ $("hintResult").textContent=
+ labels[type]+"："+(hintData[type]||"ヒント未登録");
+}
+
+
+
+function reset(){
+  clearInterval(timer);
+
+  found = new Set();
+  seconds = 1800;
+  ended = false;
+  selectedHintIndex = null;
+
+  $("answer").value = "";
+  $("hintResult").textContent = "";
+  $("message").textContent = "";
+
+  $("hintPanel").style.display = "none";
+
+  $("quiz").classList.remove("hidden");
+  $("result").classList.add("hidden");
+  $("factionResults").classList.add("hidden");
+  $("showAnswers").classList.remove("hidden");
+
+  renderList();
+  updateTime();
+  startTimer();
+}
+
+// 回答ボタン
+$("submit").addEventListener("click", answer);
+
+// Enterキーでも回答
+$("answer").addEventListener("keydown", e => {
+  if(e.key === "Enter") answer();
+});
+
+// ヒントパネルの開閉
+$("hint").addEventListener("click", () => {
+  const panel = $("hintPanel");
+
+  panel.style.display =
+    panel.style.display === "none" ? "block" : "none";
+});
+
+// ヒント
+$("hintFaction").addEventListener("click", () => showHint("faction"));
+$("hintAttribute").addEventListener("click", () => showHint("attribute"));
+$("hintRarity").addEventListener("click", () => showHint("rarity"));
+$("hintPersonal").addEventListener("click", () => showHint("personal"));
+
+// クイズ開始
+$("startButton").addEventListener("click", () => {
+  $("startScreen").classList.add("hidden");
+  $("quiz").classList.remove("hidden");
+  startTimer();
+  $("answer").focus();
+});
+  
+// ギブアップ・リセット
+$("giveup").addEventListener("click", finish);
+$("reset").addEventListener("click", reset);
+$("again").addEventListener("click", reset);
+
+// 答えを見る
+$("showAnswers").addEventListener("click", () => {
+  renderFactionResults();
+  $("factionResults").classList.remove("hidden");
+  $("showAnswers").classList.add("hidden");
+});
+
+// 初期表示
+renderList();
+updateTime();
+</script>
+</body>
+</html>
