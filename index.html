@@ -152,6 +152,15 @@ button{border:0;border-radius:10px;padding:12px 16px;font-weight:750;font-size:.
     font-size: 0.75rem;
     padding: 7px 2px;
   }
+  /* 未回答のボンプ名を赤色にする */
+.faction-character.unanswered p {
+  color: var(--red);
+}
+
+/* 正解済みのボンプ名 */
+.faction-character.answered p {
+  color: var(--green);
+}
 }
 /* ボンプ一覧 */
 .character-list {
@@ -731,17 +740,39 @@ function answer(){
 }
 
 function renderFactionResults() {
-  const container = $("factionResults");
+  const container = document.getElementById("factionResults");
 
   container.innerHTML = `
     <h2>ボンプ一覧</h2>
-    <div class="character-list">
-      ${characters.map(c => `
-        <div class="character-item">
-          <img src="${c.image}" alt="${c.name}">
-          <span>${c.name}</span>
-        </div>
-      `).join("")}
+
+    <div class="faction-grid">
+      ${characters.map((c, i) => {
+
+        // 正解済みかどうか
+        const isAnswered = found.has(i);
+
+        // 画像URLの余計な文字を除去
+        const imageUrl = c.image.replace(
+          /[\u200B-\u200D\u2060\uFEFF\uFFFC]/g,
+          ""
+        ).trim();
+
+        return `
+          <div class="faction-character ${
+            isAnswered ? "answered" : "unanswered"
+          }">
+
+            <img
+              src="${imageUrl}"
+              alt="${c.name}"
+              onerror="this.style.display='none';"
+            >
+
+            <p>${c.name}</p>
+
+          </div>
+        `;
+      }).join("")}
     </div>
   `;
 }
