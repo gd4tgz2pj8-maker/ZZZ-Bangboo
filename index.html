@@ -668,121 +668,21 @@ function answer(){
  else say("まだ正解ではないみたい。別の名前も試してみて！","bad");
 }
 
-function renderFactionResults(){
+function renderFactionResults() {
+  const container = document.getElementById("factionResults");
 
- const container=$("factionResults");
- container.innerHTML="";
-
- // 未回答の凡例
- const legend = document.createElement("p");
- legend.innerHTML = '<span style="color:#ff5c65;">●</span>：未回答';
- legend.style.fontWeight = "bold";
- legend.style.marginBottom = "12px";
-
- container.appendChild(legend);
-
- // ボンプを陣営ごとにまとめる
- const factions={};
- characters.forEach(c=>{
-  if(!factions[c.faction]){
-   factions[c.faction]=[];
-  }
-
-  factions[c.faction].push(c);
- });
-
- // 陣営の表示順
- const factionOrder = [
-  "邪兎屋",
-  "ヴィクトリア家政",
-  "白祇重工",
-  "防衛軍・オボルス小隊",
-  "対ホロウ特別行動部第六課",
-  "治安局・特務捜査班",
-  "カリュドーンの子",
-  "スターズ・オブ・リラ",
-  "防衛軍・シルバー小隊",
-  "モッキンバード",
-  "雲嶽山",
-  "怪啖屋",
-  "クランプスの黒枝",
-  "妄想エンジェル",
-  "治安局・都市秩序部",
-  "パエトーン",
-  "外務計策局",
-  "ダアト結社",
-  "空域巡警局",
-  "フリンツ工房",
-  "ロスカリファ",
-  "崩壊：スターレイル"
- ];
-
- // 指定した順番で陣営を表示
- factionOrder.forEach(faction => {
-
-  const members = factions[faction];
-
-  // ボンプがいない陣営は表示しない
-  if (!members) return;
-
-  const section = document.createElement("div");
-  section.className = "faction-section";
-
-  const title = document.createElement("h3");
-  title.className = "faction-title";
-  title.textContent = faction;
-
-  const grid = document.createElement("div");
-  grid.className = "faction-grid";
-
-  members.forEach(c => {
-
-   const card = document.createElement("div");
-   card.className = "faction-character";
-
-   if (c.image) {
-    const img = document.createElement("img");
-    img.src = c.image;
-    img.alt = c.name;
-
-    img.onerror = () => {
-     img.onerror = null;
-     img.remove();
-
-     const noImage = document.createElement("div");
-     noImage.className = "no-image";
-     noImage.textContent = "画像未設定";
-
-     card.prepend(noImage);
-    };
-
-    card.appendChild(img);
-
-   } else {
-    const noImage = document.createElement("div");
-    noImage.className = "no-image";
-    noImage.textContent = "画像未設定";
-
-    card.appendChild(noImage);
-   }
-
-   const name = document.createElement("p");
-   name.style.color = found.has(characters.indexOf(c))
-  ? "var(--text)"
-  : "#ff5c65";    
-   name.textContent = c.name;
-
-   card.appendChild(name);
-   grid.appendChild(card);
-
-  });
-
-  section.appendChild(title);
-  section.appendChild(grid);
-  container.appendChild(section);
-
- });
-}  
+  container.innerHTML = `
+    <h2>ボンプ一覧</h2>
+    <div class="character-list">
+      ${characters.map(c => `
+        <div class="character-item">
+          <img src="${c.image}" alt="${c.name}">
+          <span>${c.name}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
 function finish(){
 
  if(ended)return;
