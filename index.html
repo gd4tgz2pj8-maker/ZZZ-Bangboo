@@ -100,6 +100,37 @@ button{border:0;border-radius:10px;padding:12px 16px;font-weight:750;font-size:.
   margin:0;
   overflow-wrap:anywhere;
 }
+/* ボンプ一覧 */
+.character-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.character-item {
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  text-align: center;
+}
+
+.character-item img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  background: #111620;
+  display: block;
+}
+
+.character-item span {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 7px 2px;
+  overflow-wrap: anywhere;
+}
 
 .faction-character .no-image{
   aspect-ratio:1/1;
@@ -683,6 +714,8 @@ function renderFactionResults() {
     </div>
   `;
 }
+
+
 function finish(){
 
  if(ended)return;
