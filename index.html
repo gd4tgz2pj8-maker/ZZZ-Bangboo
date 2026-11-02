@@ -193,6 +193,36 @@ button{border:0;border-radius:10px;padding:12px 16px;font-weight:750;font-size:.
   padding: 7px 2px;
   overflow-wrap: anywhere;
 }
+/* 正解・未回答の凡例 */
+.answer-legend {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+  font-size: 0.9rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.legend-circle {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legend-circle.green {
+  background: #6ee7a8;
+}
+
+.legend-circle.red {
+  background: #ff7b86;
+}
 </style>
 </head>
 <body>
