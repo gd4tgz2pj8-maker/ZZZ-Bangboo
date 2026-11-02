@@ -128,7 +128,7 @@ button{border:0;border-radius:10px;padding:12px 16px;font-weight:750;font-size:.
 <div class="wrap">
 <section class="card" id="startScreen">
   <h2>クイズに挑戦！</h2>
-  <p>制限時間30分以内に、できるだけ多くのボンプの名前を当てよう！</p>
+  <p>制限時間20分以内に、できるだけ多くのボンプの名前を当てよう！</p>
   <button class="primary" id="startButton">クイズを始める</button>
 </section>  
 <header>
@@ -140,7 +140,7 @@ button{border:0;border-radius:10px;padding:12px 16px;font-weight:750;font-size:.
 <section class="card hidden" id="quiz">
 <div class="stats">
 <div class="stat"><small>正解数</small><strong id="score">0</strong></div>
-<div class="stat"><small>残り時間</small><strong id="time">30:00</strong></div>
+<div class="stat"><small>残り時間</small><strong id="time">20:00</strong></div>
 <div class="stat"><small>ボンプ数</small><strong id="total">0</strong></div>
 </div>
 <div class="progress"><span id="bar"></span></div>
@@ -837,7 +837,7 @@ characters.sort((a, b) =>
 const $ = id => document.getElementById(id);
 
 let found = new Set();
-let seconds = 1800;
+let seconds = 1200;
 let timer = null;
 let ended = false;
 let selectedHintIndex = null;
@@ -1068,7 +1068,7 @@ function reset(){
   clearInterval(timer);
 
   found = new Set();
-  seconds = 1800;
+  seconds = 1200;
   ended = false;
   selectedHintIndex = null;
 
