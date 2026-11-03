@@ -223,6 +223,26 @@ button{border:0;border-radius:10px;padding:12px 16px;font-weight:750;font-size:.
 .legend-circle.red {
   background: #ff7b86;
 }
+/* シルエットヒント */
+.silhouette-hint {
+  width: 180px;
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
+  margin: 12px auto;
+  background: #e5e7eb;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.silhouette-hint img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: brightness(0);
+}
 </style>
 </head>
 <body>
@@ -859,31 +879,49 @@ function selectHint(index){
 }  
 
 function showHint(type){
- if(selectedHintIndex===null){
-  $("hintResult").textContent="先に「？？？？」のマスを選んでね！";
-  return;
- }
+  if(selectedHintIndex === null){
+    $("hintResult").textContent =
+      "先に「？？？？」のマスを選んでね！";
+    return;
+  }
 
- const c=characters[selectedHintIndex];
+  const c = characters[selectedHintIndex];
 
- const hintData={
-  personal:c.personal,
-  faction:c.faction,
-  attribute:c.attribute,
-  rarity:c.rarity
- };
+  // シルエットヒント
+  if(type === "silhouette"){
 
- const labels={
-  personal:"一言",
-  faction:"陣営",
-  attribute:"属性・［追加能力］",
-  rarity:"レア度"
- };
+    const imageUrl = c.image.replace(
+      /[\u200B-\u200D\u2060\uFEFF\uFFFC]/g,
+      ""
+    ).trim();
 
- $("hintResult").textContent=
- labels[type]+"："+(hintData[type]||"ヒント未登録");
+    $("hintResult").innerHTML = `
+      <p>シルエット：</p>
+      <div class="silhouette-hint">
+        <img src="${imageUrl}" alt="ボンプのシルエット">
+      </div>
+    `;
+
+    return;
+  }
+
+  const hintData = {
+    personal: c.personal,
+    faction: c.faction,
+    attribute: c.attribute,
+    rarity: c.rarity
+  };
+
+  const labels = {
+    personal: "一言",
+    faction: "陣営",
+    attribute: "属性・［追加能力］",
+    rarity: "レア度"
+  };
+
+  $("hintResult").textContent =
+    labels[type] + "：" + (hintData[type] || "ヒント未登録");
 }
-
 
 
 function reset(){
@@ -931,6 +969,9 @@ $("hintFaction").addEventListener("click", () => showHint("faction"));
 $("hintAttribute").addEventListener("click", () => showHint("attribute"));
 $("hintRarity").addEventListener("click", () => showHint("rarity"));
 $("hintPersonal").addEventListener("click", () => showHint("personal"));
+$("hintSilhouette").addEventListener("click", () => {
+  showHint("silhouette");
+});
 
 // クイズ開始
 $("startButton").addEventListener("click", () => {
